@@ -3,6 +3,7 @@
 import ckan.plugins as p
 from ckanext.security import views, cli, authenticator
 from ckan.common import session
+from flask import session as flask_session
 
 
 class MixinPlugin(p.SingletonPlugin):
@@ -27,4 +28,8 @@ class MixinPlugin(p.SingletonPlugin):
 
     # Delete session cookie information
     def logout(self):
-        session.invalidate()
+        # Clear all session data
+        flask_session.clear()
+        # Ensure specific CKAN-related session keys are removed
+        for key in list(session.keys()):
+            del session[key]

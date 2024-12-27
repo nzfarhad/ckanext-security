@@ -26,7 +26,10 @@ if not tk.asbool(config.get(
 def check_user_and_access():
     gc = _get_global()
     context = {'model': model, 'user': gc.user, 'auth_user_obj': gc.userobj}
-    check_access('site_read', context)
+    try:
+        check_access('user_show', context)
+    except NotAuthorized:
+        abort(403, _('Not authorized to access this resource'))
     if not gc.userobj:
         abort(403, _('No user specified'))
 

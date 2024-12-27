@@ -8,26 +8,32 @@ import sys
 
 from ckan import model
 from ckan.model import DomainObject, User
-from ckan.model.meta import metadata, mapper
+from ckan.model.meta import metadata, registry
 from ckan.plugins import toolkit
-from sqlalchemy import Table, Column, types
+from sqlalchemy import Table, Column, types, inspect
 
 log = logging.getLogger(__name__)
 user_security_totp = None
+
+
+def table_exists(table_name):
+    """Check if a table exists in the database"""
+    inspector = inspect(model.Session.bind)
+    return table_name in inspector.get_table_names()
 
 
 def db_setup():
     if user_security_totp is None:
         define_security_tables()
 
-    if not model.package_table.exists():
+    if not table_exists('package'):
         log.critical("Exiting: can not migrate security model \
 if the database does not exist yet")
         sys.exit(1)
         return
 
-    if not user_security_totp.exists():
-        user_security_totp.create()
+    if not table_exists('user_security_totp'):
+        user_security_totp.create(model.Session.bind)
         print("Created security TOTP table")
     else:
         print("Security TOTP table already exists -- skipping")
@@ -44,7 +50,7 @@ def define_security_tables():
         Column('secret', types.UnicodeText, default=u''),
         Column('last_successful_challenge', types.DateTime))
 
-    mapper(
+    registry.map_imperatively(
         SecurityTOTP,
         user_security_totp
     )

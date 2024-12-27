@@ -7,18 +7,25 @@ setup(
     version=version,
     description='Various security patches for CKAN',
     long_description='',
-    # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
-    classifiers=[],
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+    ],
     keywords='',
     author='Data.govt.nz',
     author_email='info@data.govt.nz',
     url='https://www.data.govt.nz',
-    license='',
+    license='AGPL',
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     namespace_packages=['ckanext'],
     include_package_data=True,
     zip_safe=False,
-    install_requires=[],
+    install_requires=[
+        'ckan>=2.11.1',
+    ],
     dependency_links=[],
     entry_points="""
     [ckan.plugins]
