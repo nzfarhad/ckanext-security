@@ -24,7 +24,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'ckan>=2.11.2',
+        'ckan>=2.11.0',
     ],
     dependency_links=[],
     entry_points="""
