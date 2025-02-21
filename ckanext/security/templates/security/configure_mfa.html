@@ -25,6 +25,8 @@
     {% asset 'security/mfa_configure' %}
 
     <form id="mfa-form" method="POST">
+        {% include 'security/snippets/csrf_token.html' %}
+        
         <fieldset>
             <legend>{{_('Scan this QR code with your two factor authentication app')}}</legend>
 
@@ -47,7 +49,6 @@
             }}
             <button class="btn btn-primary" type="submit">{{_('Test')}}</button>
         </fieldset>
-
     </form>
 
     {% set locale = h.dump_json({'content': _('Are you sure you want to generate a new two factor secret?')}) %}

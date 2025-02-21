@@ -13,6 +13,8 @@ overrides rendering of the login form
 {% endif %}
 
 <form id="mfa-login-form" action="{{ action }}" method="post" class="form-horizontal">
+  {% include 'security/snippets/csrf_token.html' %}
+  
   <div class="error-explanation alert alert-error" style="display: none;">
     <p id="invalid-entries">{{ _('The form contains invalid entries:') }}</p>
     <ul>
@@ -23,10 +25,8 @@ overrides rendering of the login form
   </div>
 
   <div id="login-form">
-
     <div id="login-fields">
       {{ form.input('login', label=_("Username"), id='field-login', value="", error=username_error, classes=["control-medium"]) }}
-
       {{ form.input('password', label=_("Password"), id='field-password', type="password", value="", error=password_error, classes=["control-medium"]) }}
     </div>
 
@@ -63,5 +63,4 @@ overrides rendering of the login form
       </div>
     </div>
   {% endif %}
-
 </form>

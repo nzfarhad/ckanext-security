@@ -10,7 +10,7 @@ from ckanext.security.resource_upload_validator import (
 )
 from ckanext.security.logic import auth, action
 from ckanext.security.helpers import security_enable_totp
-
+from ckanext.security.csrf import generate_csrf_token, validate_csrf_token, csrf_protect
 from ckanext.security.plugin.flask_plugin import MixinPlugin
 
 log = logging.getLogger(__name__)
@@ -22,6 +22,7 @@ class CkanSecurityPlugin(MixinPlugin, p.SingletonPlugin):
     p.implements(p.IActions)
     p.implements(p.IAuthFunctions)
     p.implements(p.ITemplateHelpers)
+    p.implements(p.IMiddleware, inherit=True)
 
     # BEGIN Hooks for IConfigurer
 
@@ -64,40 +65,38 @@ class CkanSecurityPlugin(MixinPlugin, p.SingletonPlugin):
 
     # END Hooks for IResourceController
 
+    # BEGIN Hooks for IMiddleware
+
+    def make_middleware(self, app, config):
+        """Add CSRF protection middleware."""
+        return CSRFMiddleware(app)
+
+    # END Hooks for IMiddleware
+
     # BEGIN Hooks for IActions
 
     def get_actions(self):
         return {
-            'security_throttle_user_reset':
-                action.security_throttle_user_reset,
-            'security_throttle_address_reset':
-                action.security_throttle_address_reset,
-            'security_throttle_user_show':
-                action.security_throttle_user_show,
-            'security_throttle_address_show':
-                action.security_throttle_address_show,
-            'security_reset_totp':
-                action.security_reset_totp,
-            'user_update':
-                action.user_update,
+            'security_reset_totp': action.security_reset_totp,
+            'security_throttle_user_show': action.security_throttle_user_show,
+            'security_throttle_address_show': action.security_throttle_address_show,
+            'security_throttle_user_reset': action.security_throttle_user_reset,
+            'security_throttle_address_reset': action.security_throttle_address_reset
         }
+
     # END Hooks for IActions
 
     # BEGIN Hooks for IAuthFunctions
 
     def get_auth_functions(self):
         return {
-            'security_throttle_user_reset':
-                auth.security_throttle_user_reset,
-            'security_throttle_address_reset':
-                auth.security_throttle_address_reset,
-            'security_throttle_user_show':
-                auth.security_throttle_user_show,
-            'security_throttle_address_show':
-                auth.security_throttle_address_show,
-            'security_reset_totp':
-                auth.security_reset_totp,
+            'security_reset_totp': auth.security_reset_totp,
+            'security_throttle_user_show': auth.security_throttle_user_show,
+            'security_throttle_address_show': auth.security_throttle_address_show,
+            'security_throttle_user_reset': auth.security_throttle_user_reset,
+            'security_throttle_address_reset': auth.security_throttle_address_reset
         }
+
     # END Hooks for IAuthFunctions
 
     # ITemplateHelpers
@@ -106,4 +105,31 @@ class CkanSecurityPlugin(MixinPlugin, p.SingletonPlugin):
         return {
             'check_ckan_version': tk.check_ckan_version,
             'security_enable_totp': security_enable_totp,
+            'get_csrf_token': generate_csrf_token
         }
+
+
+class CSRFMiddleware:
+    """WSGI middleware that adds CSRF protection."""
+
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        # Skip CSRF check for safe methods
+        if environ['REQUEST_METHOD'] not in ('GET', 'HEAD', 'OPTIONS'):
+            # Get the token from headers or form data
+            token = environ.get('HTTP_X_CSRF_TOKEN')
+            if not token and 'wsgi.input' in environ:
+                from ckan.common import request
+                token = request.form.get('csrf_token')
+
+            # Validate token
+            if not validate_csrf_token(token):
+                # Return 403 Forbidden if validation fails
+                status = '403 Forbidden'
+                headers = [('Content-Type', 'text/plain')]
+                start_response(status, headers)
+                return [b'CSRF validation failed']
+
+        return self.app(environ, start_response)
