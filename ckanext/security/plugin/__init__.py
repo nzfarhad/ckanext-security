@@ -1,5 +1,6 @@
 import logging
 import ckan.plugins as p
+import hmac
 
 from ckanext.security import schema as ext_schema
 from ckan.plugins import toolkit as tk
@@ -12,9 +13,20 @@ from ckanext.security.logic import auth, action
 from ckanext.security.helpers import security_enable_totp
 from ckanext.security.csrf import generate_csrf_token, validate_csrf_token, csrf_protect
 from ckanext.security.plugin.flask_plugin import MixinPlugin
+from werkzeug.wrappers import Request
+from ckan.common import session
 
 log = logging.getLogger(__name__)
 
+# List of paths that should be exempt from CSRF protection
+CSRF_EXEMPT_PATHS = [
+    '/api/i18n/',
+    '/api/get/',
+    '/api/search/',
+    '/api/util/snippet/',
+    '/api/2/util/user/autocomplete',
+    '/api/3/action/status_show',
+]
 
 class CkanSecurityPlugin(MixinPlugin, p.SingletonPlugin):
     p.implements(p.IConfigurer)
@@ -115,21 +127,44 @@ class CSRFMiddleware:
     def __init__(self, app):
         self.app = app
 
-    def __call__(self, environ, start_response):
-        # Skip CSRF check for safe methods
-        if environ['REQUEST_METHOD'] not in ('GET', 'HEAD', 'OPTIONS'):
-            # Get the token from headers or form data
-            token = environ.get('HTTP_X_CSRF_TOKEN')
-            if not token and 'wsgi.input' in environ:
-                from ckan.common import request
-                token = request.form.get('csrf_token')
+    def is_exempt(self, path):
+        """Check if the path is exempt from CSRF protection."""
+        return any(path.startswith(exempt) for exempt in CSRF_EXEMPT_PATHS)
 
-            # Validate token
-            if not validate_csrf_token(token):
-                # Return 403 Forbidden if validation fails
-                status = '403 Forbidden'
-                headers = [('Content-Type', 'text/plain')]
-                start_response(status, headers)
-                return [b'CSRF validation failed']
+    def get_token_from_request(self, request):
+        """Extract CSRF token from request."""
+        # Try to get token from headers first
+        token = request.headers.get('X-CSRF-Token')
+        
+        # If not in headers and it's a form submission, try to get from form data
+        if not token and request.method == 'POST':
+            try:
+                token = request.form.get('csrf_token')
+            except (AttributeError, RuntimeError):
+                # Handle cases where form parsing fails
+                pass
+        
+        return token
+
+    def __call__(self, environ, start_response):
+        # Create request object
+        request = Request(environ)
+        
+        # Skip CSRF check for safe methods or exempt paths
+        if request.method in ('GET', 'HEAD', 'OPTIONS') or self.is_exempt(request.path):
+            return self.app(environ, start_response)
+
+        # Get token
+        token = self.get_token_from_request(request)
+        
+        # Get stored token from session
+        stored_token = session.get('csrf_token')
+        
+        # Validate token
+        if not token or not stored_token or not hmac.compare_digest(stored_token, token):
+            status = '403 Forbidden'
+            headers = [('Content-Type', 'text/plain')]
+            start_response(status, headers)
+            return [b'CSRF validation failed']
 
         return self.app(environ, start_response)
