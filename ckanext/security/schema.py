@@ -36,7 +36,7 @@ def default_user_schema():
         'sysadmin': [ignore_missing, ignore_not_sysadmin],
         'apikey': [ignore],
         'reset_key': [ignore],
-        'activity_streams_email_notifications': [ignore_missing],
+        'activity_streams_email_notifications': [ignore_missing, bool],
         'state': [ignore_missing],
         'image_url': [ignore_missing],
     }
