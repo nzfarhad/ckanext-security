@@ -18,6 +18,17 @@ from ckanext.security.validators import (
 # allowed.
 
 
+def boolean_validator(value):
+    """Convert a value to a boolean"""
+    if isinstance(value, bool):
+        return value
+    if value.lower() in ['true', '1', 'yes', 'on', 't']:
+        return True
+    if value.lower() in ['false', '0', 'no', 'off', 'f']:
+        return False
+    raise ValueError('Invalid boolean value')
+
+
 def default_user_schema():
     schema = {
         'id': [ignore_missing, ensure_str],
@@ -36,7 +47,7 @@ def default_user_schema():
         'sysadmin': [ignore_missing, ignore_not_sysadmin],
         'apikey': [ignore],
         'reset_key': [ignore],
-        'activity_streams_email_notifications': [ignore_missing, bool],
+        'activity_streams_email_notifications': [ignore_missing, boolean_validator],
         'state': [ignore_missing],
         'image_url': [ignore_missing],
     }
