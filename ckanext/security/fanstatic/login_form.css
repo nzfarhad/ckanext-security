@@ -2,18 +2,30 @@
 
 .error-explanation {
     display: none !important;
+    visibility: hidden !important;
 }
 
 .error-explanation.show {
     display: block !important;
+    visibility: visible !important;
 }
 
 .error-explanation li {
     display: none !important;
+    visibility: hidden !important;
 }
 
 .error-explanation li.show {
     display: list-item !important;
+    visibility: visible !important;
+}
+
+/* Prevent any flash during form submission */
+form:focus-within .error-explanation,
+form:active .error-explanation,
+form:target .error-explanation {
+    display: none !important;
+    visibility: hidden !important;
 }
 
 .mfa-form {

@@ -107,6 +107,14 @@
   }
 
   $(document).ready(function () {
+    // Immediately hide any error messages on page load
+    hideError()
+    
     getLoginForm().on('submit', validateLoginCredentials)
+    
+    // Also hide errors on any form interaction
+    getLoginForm().on('click keydown keyup', function() {
+      hideError()
+    })
   })
 })($)

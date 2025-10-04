@@ -14,7 +14,7 @@ overrides rendering of the login form
 {% asset 'security/login_form_css' %}
 
 <form id="mfa-login-form" action="{{ action }}" method="post" class="form-horizontal">
-  <div class="error-explanation alert alert-error">
+  <div class="error-explanation alert alert-error" style="display: none !important;">
     <p id="invalid-entries">{{ _('The form contains invalid entries:') }}</p>
     <ul>
       <li id="login-error" data-field-label>{{ _('Login failed. Incorrect username or password.') }}</li>
