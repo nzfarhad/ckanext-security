@@ -1,11 +1,19 @@
 /* Security extension login form styles */
 
 .error-explanation {
-    display: none;
+    display: none !important;
 }
 
 .error-explanation.show {
-    display: block;
+    display: block !important;
+}
+
+.error-explanation li {
+    display: none !important;
+}
+
+.error-explanation li.show {
+    display: list-item !important;
 }
 
 .mfa-form {

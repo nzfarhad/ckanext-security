@@ -91,7 +91,7 @@
     hideError() // always reset state before displaying errors
 
     var errorElId = '#' + (type || 'unknown') + '-error'
-    $(errorElId).show()
+    $(errorElId).addClass('show')
     if (!type) {
       $('#invalid-entries').hide()
     }
@@ -101,7 +101,7 @@
 
   var hideError = function () {
     $('.error-explanation').removeClass('show')
-    $('.error-explanation li').hide()
+    $('.error-explanation li').removeClass('show')
     $('#invalid-entries').show()
     $('.control-group').removeClass('error')
   }
