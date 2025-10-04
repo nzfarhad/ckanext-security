@@ -4,6 +4,10 @@
     display: none;
 }
 
+.error-explanation.show {
+    display: block;
+}
+
 .mfa-form {
     display: none;
 }

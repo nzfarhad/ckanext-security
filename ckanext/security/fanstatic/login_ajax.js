@@ -96,11 +96,11 @@
       $('#invalid-entries').hide()
     }
     $('.control-group').addClass('error')
-    $('.error-explanation').show()
+    $('.error-explanation').addClass('show')
   }
 
   var hideError = function () {
-    $('.error-explanation').hide()
+    $('.error-explanation').removeClass('show')
     $('.error-explanation li').hide()
     $('#invalid-entries').show()
     $('.control-group').removeClass('error')
