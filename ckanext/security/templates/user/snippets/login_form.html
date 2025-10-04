@@ -11,9 +11,10 @@ overrides rendering of the login form
 {% if h.security_enable_totp() %}
   {% asset 'security/mfa_login' %}
 {% endif %}
+{% asset 'security/login_form_css' %}
 
 <form id="mfa-login-form" action="{{ action }}" method="post" class="form-horizontal">
-  <div class="error-explanation alert alert-error" style="display: none;">
+  <div class="error-explanation alert alert-error">
     <p id="invalid-entries">{{ _('The form contains invalid entries:') }}</p>
     <ul>
       <li id="login-error" data-field-label>{{ _('Login failed. Incorrect username or password.') }}</li>
@@ -40,8 +41,8 @@ overrides rendering of the login form
   </div>
 
   {% if h.security_enable_totp() %}
-    <div id="mfa-form" style="display: none;">
-      <fieldset id="mfa-setup" style="display: none;">
+    <div id="mfa-form" class="mfa-form">
+      <fieldset id="mfa-setup" class="mfa-setup">
         <legend>{{_('Scan this QR code with your two factor authentication app')}}</legend>
         <p>{% trans %}If you don't already have an authenticator app, you could try Google Authenticator.{% endtrans %}</p>
 
@@ -58,7 +59,7 @@ overrides rendering of the login form
 
       <input id="mfa-form-active" name="mfa-form-active" type="hidden" value="" />
       <div class="form-actions">
-        <a id="mfa-help-link" href="/" style="display: none; margin-right: 20px;">{{_('Need help?')}}</a>
+        <a id="mfa-help-link" href="/" class="mfa-help-link">{{_('Need help?')}}</a>
         <button class="btn btn-primary" type="submit">{{ _('Submit') }}</button>
       </div>
     </div>

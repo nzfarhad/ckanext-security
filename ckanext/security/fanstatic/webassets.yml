@@ -6,6 +6,10 @@ mfa_login:  # name of the asset
   contents: # list of files that are included in the asset
     - qrious.js
     - login_ajax.js
+login_form_css:
+  output: security/login-form.css
+  contents:
+    - login_form.css
 mfa_configure:
   output: security/mfa-configure.js  # actual path, where the generated file will be stored
   extra:
